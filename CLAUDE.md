@@ -39,5 +39,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Конвенции
 
 - Комментарии в коде и тексты интерфейса пишутся на русском.
-- Коммиты: Conventional Commits на английском, со scope пакета (`feat(api): ...`, `fix(web): ...`, `chore: ...`).
 - Prettier: одинарные кавычки, trailing comma, ширина строки 100.
+
+## Коммиты
+
+- Коммитим только по явной просьбе пользователя.
+- Формат [Conventional Commits](https://www.conventionalcommits.org/) на английском: `<type>(<scope>): <subject>`.
+  - `type`: `feat`, `fix`, `refactor`, `perf`, `docs`, `style`, `test`, `build`, `ci`, `chore`.
+  - `scope` — пакет: `api`, `web`, `shared`. Если изменение затрагивает несколько пакетов, scope ставится по основному пакету фичи. Изменения корня монорепо (конфиги, CLAUDE.md, CI) идут без scope: `chore: ...`, `docs: ...`.
+  - `subject` в повелительном наклонении, со строчной буквы, без точки в конце, не длиннее 72 символов: `feat(api): add transactions module`.
+- Тело коммита нужно, если изменение не очевидно из subject. Оно объясняет, что и зачем изменено; перечисления оформляются списком через `-`.
+- Ломающее изменение API помечается `!` после scope (`feat(api)!: ...`) и строкой `BREAKING CHANGE: ...` в теле.
+- Один коммит — одна логическая задача. Фича коммитится вместе со своей миграцией Prisma, схемами в shared и сопутствующими правками документации.
+- Перед коммитом `pnpm typecheck && pnpm lint` должны проходить.
+- Не коммитить `.env`, сгенерированный Prisma Client, `dist/` и черновики планов `.claude/.plans/` (они в `.gitignore`).
