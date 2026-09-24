@@ -6,6 +6,8 @@ export const PrismaErrorCode = {
   UniqueViolation: 'P2002',
   /** Запись для update/delete не найдена. */
   RecordNotFound: 'P2025',
+  /** Нарушение внешнего ключа, например удаление записи, на которую ссылаются. */
+  ForeignKeyViolation: 'P2003',
 } as const;
 
 export function isPrismaError(error: unknown, code: string): boolean {

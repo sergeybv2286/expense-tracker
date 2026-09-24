@@ -20,10 +20,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - `apps/api` компилируется в **CommonJS** (`module: nodenext` без `"type": "module"`), поэтому относительные импорты пишутся без расширений. Генератор Prisma настроен на `moduleFormat = "cjs"`.
 - Prisma Client генерируется в `apps/api/src/generated/prisma` (в .gitignore) и импортируется из `../generated/prisma/client`, а не из `@prisma/client`. После правки `schema.prisma` нужно выполнить `pnpm db:generate`.
-- `packages/shared` потребляется из `dist` (собирается через `tsc`). В нём внутренние импорты пишутся с `.js` (`./expense.js`). После правок в shared нужен его `build`: turbo делает его автоматически через `^build`.
+- `packages/shared` потребляется из `dist` (собирается через `tsc`). В нём внутренние импорты пишутся с `.js` (`./transaction.js`). После правок в shared нужен его `build`: turbo делает его автоматически через `^build`.
 - Валидация входных данных в API делается zod-схемами из `@expense-tracker/shared` через `ZodValidationPipe` (`apps/api/src/common`). class-validator не используется.
 - Все роуты API имеют префикс `/api`, порт 3001. Web работает на порту 3000.
-- Суммы хранятся как `Decimal(12,2)` и в API передаются строкой (см. интерфейс `Expense` в shared). Не приводить их к `number`.
+- Суммы хранятся как `Decimal(12,2)` и в API передаются строкой (см. интерфейс `Transaction` в shared). Не приводить их к `number`.
 - UI-компоненты добавляются через shadcn CLI (`pnpm dlx shadcn@latest add <component>` в `apps/web`), руками их не пишем. Алиасы в `components.json` ведут в `src/shared/ui` и `src/shared/lib`, поэтому CLI кладёт компоненты сразу в слой `shared`. После `shadcn add` проверь, что в новых файлах импорт `cn` идёт из `@/shared/lib/utils`: CLI может подставить `from "cn"` и добавить в `package.json` посторонний npm-пакет `cn`. Тогда замени импорт и удали пакет (`pnpm remove cn`).
 - `apps/web` построен по **Feature-Sliced Design**. Код лежит в `apps/web/src` по слоям (сверху вниз): `app` → `views` → `widgets` → `features` → `entities` → `shared`. Слой импортирует только слои ниже себя, соседние слайсы одного слоя друг друга не импортируют.
   - `app` — это Next.js App Router: только роуты, `layout.tsx` и метаданные. Страница в `app/` — тонкая обёртка, которая реэкспортирует компонент из `views`. Логики и вёрстки здесь нет.

@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { isPrismaError, PrismaErrorCode } from '../../common/prisma-errors';
 import { DeleteCategoryCommand } from '../contracts';
@@ -14,6 +14,9 @@ export class DeleteCategoryHandler implements ICommandHandler<DeleteCategoryComm
     } catch (error) {
       if (isPrismaError(error, PrismaErrorCode.RecordNotFound)) {
         throw new NotFoundException('Категория не найдена');
+      }
+      if (isPrismaError(error, PrismaErrorCode.ForeignKeyViolation)) {
+        throw new ConflictException('Нельзя удалить категорию, в которой есть транзакции');
       }
       throw error;
     }
