@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { paginationQuerySchema } from './pagination.js';
 
 export const TRANSACTION_TYPES = ['INCOME', 'EXPENSE'] as const;
 export const transactionTypeSchema = z.enum(TRANSACTION_TYPES);
@@ -11,7 +12,7 @@ export const createTransactionSchema = z.object({
   amount: z
     .string()
     .trim()
-    .regex(TRANSACTION_AMOUNT_REGEX)
+    .regex(TRANSACTION_AMOUNT_REGEX, 'Введите сумму, например 1250.50')
     .refine((value) => /[1-9]/.test(value), 'Сумма должна быть больше нуля'),
   type: transactionTypeSchema,
   description: z.string().trim().max(255).nullable().optional(),
@@ -34,6 +35,7 @@ export type TransactionPeriod = z.infer<typeof transactionPeriodSchema>;
 export const transactionListQuerySchema = transactionPeriodSchema.extend({
   type: transactionTypeSchema.optional(),
   categoryId: z.uuid().optional(),
+  ...paginationQuerySchema.shape,
 });
 export type TransactionListQuery = z.infer<typeof transactionListQuerySchema>;
 
