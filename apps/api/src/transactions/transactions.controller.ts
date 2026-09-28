@@ -18,6 +18,7 @@ import {
   transactionSummaryQuerySchema,
   updateTransactionSchema,
   type CreateTransactionInput,
+  type Paginated,
   type Transaction,
   type TransactionListQuery,
   type TransactionSummary,
@@ -47,7 +48,7 @@ export class TransactionsController {
   list(
     @CurrentUser() user: AuthUser,
     @Query(new ZodValidationPipe(transactionListQuerySchema)) query: TransactionListQuery,
-  ): Promise<Transaction[]> {
+  ): Promise<Paginated<Transaction>> {
     return this.queryBus.execute(new ListTransactionsQuery(user.id, query));
   }
 

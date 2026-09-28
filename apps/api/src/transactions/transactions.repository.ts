@@ -14,6 +14,11 @@ export interface TransactionTotals {
   byCategory: { categoryId: string; type: TransactionType; total: Prisma.Decimal | null }[];
 }
 
+export interface TransactionPage {
+  records: Transaction[];
+  total: number;
+}
+
 /**
  * Единственное место работы с таблицей transactions через Prisma.
  * Все методы фильтруют по userId, чтобы нельзя было обратиться к чужой транзакции.
@@ -22,14 +27,22 @@ export interface TransactionTotals {
 export class TransactionsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findMany(
+  /** Страница транзакций по фильтру и общее количество подходящих записей. */
+  async findPage(
     userId: string,
-    { type, categoryId, ...period }: TransactionListQuery,
-  ): Promise<Transaction[]> {
-    return this.prisma.transaction.findMany({
-      where: { userId, type, categoryId, ...this.periodFilter(period) },
-      orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
-    });
+    { type, categoryId, page, pageSize, ...period }: TransactionListQuery,
+  ): Promise<TransactionPage> {
+    const where = { userId, type, categoryId, ...this.periodFilter(period) };
+    const [records, total] = await this.prisma.$transaction([
+      this.prisma.transaction.findMany({
+        where,
+        orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.prisma.transaction.count({ where }),
+    ]);
+    return { records, total };
   }
 
   findById(id: string, userId: string): Promise<Transaction | null> {
